@@ -1,8 +1,11 @@
 ---
 import { studio } from '../config/studio';
 import { fill, titleHtml } from '../lib/text';
+import BookingCta from './BookingCta.astro';
 
 const { eyebrow, title, text, facts, steps } = studio.sections.offer;
+// Un seul des deux blocs : une colonne au lieu de deux.
+const single = facts.length === 0 || steps.length === 0;
 ---
 
 <section class="section discovery" aria-labelledby="offre-titre">
@@ -11,21 +14,28 @@ const { eyebrow, title, text, facts, steps } = studio.sections.offer;
     <h2 class="title" id="offre-titre" set:html={titleHtml(title)} />
     {text && <p class="lead">{text}</p>}
 
-    <div class="discovery__grid">
-      <dl class="card discovery__facts">
-        {facts.map((fact) => (
-          <div class="fact">
-            <dt class="fact__label">{fact.label}</dt>
-            <dd class="fact__value">{fill(fact.value)}</dd>
-          </div>
-        ))}
-      </dl>
+    {(facts.length > 0 || steps.length > 0) && (
+      <div class:list={['discovery__grid', single && 'discovery__grid--single']}>
+        {facts.length > 0 && (
+          <dl class="card discovery__facts">
+            {facts.map((fact) => (
+              <div class="fact">
+                <dt class="fact__label">{fact.label}</dt>
+                <dd class="fact__value">{fill(fact.value)}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
 
-      {steps.length > 0 && (
-        <ol class="discovery__steps">
-          {steps.map((step) => <li>{step}</li>)}
-        </ol>
-      )}
-    </div>
+        {steps.length > 0 && (
+          <div class="discovery__next">
+            <ol class="discovery__steps">
+              {steps.map((step) => <li>{fill(step)}</li>)}
+            </ol>
+            <BookingCta id="offre-reserver" class="discovery__booking" phone={false} />
+          </div>
+        )}
+      </div>
+    )}
   </div>
 </section>

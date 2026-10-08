@@ -10,7 +10,7 @@ function escape(text: string): string {
 }
 
 /**
- * Titre de studio.ts → HTML : **gras**, *italique Cormorant*, \n à la ligne.
+ * Titre de studio.ts → HTML : **gras**, *italique en police d'accent*, \n à la ligne.
  * Le texte est échappé avant toute balise.
  */
 export function titleHtml(text: string): string {

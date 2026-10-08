@@ -1,0 +1,25 @@
+---
+import { studio } from '../config/studio';
+import { fill } from '../lib/text';
+import CtaButton from './CtaButton.astro';
+import PhoneAlt from './PhoneAlt.astro';
+
+/**
+ * Bloc d'appel à l'action : le bouton de réservation, ce qui attend la
+ * personne sur Momence, et le numéro du studio en secondaire.
+ */
+interface Props {
+  id?: string;
+  class?: string;
+  /** Numéro du studio sous le bouton. Défaut : affiché. */
+  phone?: boolean;
+}
+
+const { id, class: className, phone = true } = Astro.props;
+---
+
+<div class:list={['booking', className]} id={id}>
+  <CtaButton class="booking__btn" />
+  {studio.cta.note && <p class="booking__note">{fill(studio.cta.note)}</p>}
+  {phone && <PhoneAlt class="booking__phone" />}
+</div>

@@ -14,7 +14,7 @@ const google = googleReview && {
 // grands écrans), posée deux fois, puis décalée de -50 %. Seul le premier
 // passage des avis est lu par les lecteurs d'écran ; les copies sont masquées.
 const MIN_CARDS = 6;
-const repeat = Math.max(1, Math.ceil(MIN_CARDS / reviews.length));
+const repeat = reviews.length > 0 ? Math.ceil(MIN_CARDS / reviews.length) : 0;
 const sequence = Array.from({ length: repeat }, () => reviews).flat();
 const loop = [...sequence, ...sequence];
 // Environ 9 s par carte : une vitesse de lecture, pas un défilé.
@@ -27,7 +27,7 @@ const duration = `${sequence.length * 9}s`;
       <p class="eyebrow">{eyebrow}</p>
       <div class="reviews__head">
         <h2 class="title" id="avis-titre" set:html={titleHtml(title)} />
-        {google && <p class="reviews__google">{google.rating} / 5 sur Google · {google.count} avis</p>}
+        {google && <p class="reviews__google">{google.rating}/5 sur Google • {google.count} avis</p>}
       </div>
     </div>
 

@@ -4,12 +4,13 @@ import type { ImageMetadata } from 'astro';
 import { studio } from '../config/studio';
 
 /**
+ * Logo à gauche, nom (et signature dans le hero) à droite.
  * Le fichier du logo sert de masque : sa forme est gardée, sa couleur vient du
  * texte autour (currentColor). Un seul fichier, lisible sur le voile sombre du
  * hero mobile comme sur les fonds clairs. SVG ou PNG transparent.
  */
 interface Props {
-  /** Le hero affiche la signature et, sans logo, le rappel de remplacement. */
+  /** Le hero affiche aussi la signature. */
   full?: boolean;
   class?: string;
 }
@@ -37,17 +38,16 @@ if (studio.logo) {
 
 <div class:list={['logo', className]}>
   {
-    logo ? (
+    logo && (
       <span
         class="logo__img"
-        role="img"
-        aria-label={studio.name}
+        aria-hidden="true"
         style={`--logo: url(${logo.url}); aspect-ratio: ${logo.ratio}`}
       />
-    ) : (
-      <span class="logo__name">{studio.name}</span>
     )
   }
-  {full && studio.tagline && <span class="logo__tagline">{studio.tagline}</span>}
-  {full && !logo && <span class="logo__todo">[ Remplacer par le logo ]</span>}
+  <span class="logo__text">
+    <span class="logo__name">{studio.name}</span>
+    {full && studio.tagline && <span class="logo__tagline">{studio.tagline}</span>}
+  </span>
 </div>

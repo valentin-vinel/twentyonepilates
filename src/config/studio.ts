@@ -5,11 +5,13 @@
  *  avis, équipe, photos. Aucun composant n'en contient.
  *
  *  Les valeurs entre crochets « [ … ] » sont des placeholders : elles
- *  s'affichent telles quelles pour qu'aucun oubli ne passe inaperçu.
+ *  s'affichent telles quelles pour qu'aucun oubli ne passe inaperçu, et le
+ *  build les liste dans la console.
+ *  Les listes vides masquent l'élément correspondant (section, bandeau, ligne).
  *
  *  Mise en forme des titres :
  *    **mot**  → graisse 700
- *    *mot*    → Cormorant Garamond italique (un seul par titre)
+ *    *mot*    → graisse 700, en rose (un seul par titre)
  *    \n       → retour à la ligne
  *  Jeton remplacé à l'affichage :
  *    {price}    → prix de la séance découverte (`offer.price`), ex. « 15 € »
@@ -24,6 +26,8 @@ export interface PhotoSlot {
   subject: string;
   /** Texte alternatif descriptif. Obligatoire dès que `file` est rempli. */
   alt: string;
+  /** Cadrage dans l'emplacement (object-position CSS), ex. « center 35% ». Défaut : centré. */
+  focus?: string;
 }
 
 /** Une ligne du récapitulatif de la séance découverte. */
@@ -67,7 +71,7 @@ export interface Studio {
   siteUrl: string;
   name: string;
   tagline: string;
-  /** Logo SVG dans src/assets/studio/. null : le nom s'affiche en texte. */
+  /** Logo dans src/assets/studio/, affiché à gauche du nom. null : le nom seul. */
   logo: string | null;
   /** Adresse sur une ligne, pour le pied de page. */
   address: string;
@@ -86,7 +90,7 @@ export interface Studio {
     capital: string;
     /** Siège social, s'il diffère de `address`. Vide sinon. */
     headOffice: string;
-    /** Ex. « RCS Le Mans 123 456 789 ». */
+    /** Ex. « RCS Ville 123 456 789 ». */
     registration: string;
     /** Numéro de TVA intracommunautaire, ou mention d'exonération. */
     vat: string;
@@ -100,11 +104,20 @@ export interface Studio {
   phone: string;
   /** Le numéro tel qu'on le lit. */
   phoneDisplay: string;
-  /** Proposé en secondaire, sous chaque appel à l'action : « {phoneAlt} 02 43… ». */
+  /** Proposé en secondaire, sous chaque appel à l'action : « {phoneAlt} 06 12… ». */
   phoneAlt: string;
 
-  /** Libellé unique de l'appel à l'action, identique partout. Mène au formulaire. */
-  cta: { label: string };
+  /**
+   * Appel à l'action unique : lien direct vers la réservation en ligne de la
+   * séance découverte sur Momence. Même libellé et même lien partout.
+   */
+  cta: {
+    label: string;
+    /** Lien Momence de la séance découverte (https://momence.com/…), pas la page d'accueil du planning. */
+    url: string;
+    /** Sous le bouton : ce qui attend la personne en cliquant. Factuel, vérifié sur Momence. */
+    note: string;
+  };
 
   meta: {
     title: string;
@@ -129,28 +142,6 @@ export interface Studio {
   };
 
   /**
-   * Formulaire de demande de rappel (Netlify Forms, puis Google Sheets via
-   * netlify/functions/submission-created.ts).
-   */
-  form: {
-    /** Identifiant Netlify du formulaire. Le changer crée un nouveau formulaire côté Netlify. */
-    name: string;
-    title: string;
-    text: string;
-    firstNameLabel: string;
-    phoneLabel: string;
-    phoneHint: string;
-    submit: string;
-    sending: string;
-    /** Sous le bouton, avec un lien vers la politique de confidentialité. */
-    privacy: string;
-    success: { title: string; text: string };
-    error: string;
-    /** Durée de conservation des demandes, reprise dans la politique de confidentialité. */
-    retention: string;
-  };
-
-  /**
    * Bandeau sombre sous le hero. Des faits vérifiables uniquement.
    * `mobile: true` : l'élément reste affiché sur mobile, à la suite des `perks`.
    */
@@ -163,7 +154,7 @@ export interface Studio {
       text: string;
       /** Récapitulatif factuel de la séance. */
       facts: Fact[];
-      /** Ce qui se passe après l'envoi du formulaire, dans l'ordre. */
+      /** De la page au cours : réservation en ligne, puis venue au studio, dans l'ordre. */
       steps: string[];
     };
     studio: {
@@ -183,10 +174,11 @@ export interface Studio {
     reviews: { eyebrow: string; title: string };
     faq: { eyebrow: string; title: string };
     team: { eyebrow: string; title: string };
+    /** Dernier appel à l'action, avant le pied de page. */
     final: {
       title: string;
       text: string;
-      /** Photo de la devanture, en grand sous l'appel final. null : aucune. */
+      /** Grande photo du bloc final (devanture, salle…). null : aucune. */
       storefront: PhotoSlot | null;
       /** Quatre photos carrées, en grille 2 × 2 à côté de la devanture. */
       photos: PhotoSlot[];
@@ -206,124 +198,146 @@ export interface Studio {
 }
 
 export const studio: Studio = {
-  siteUrl: 'https://nu-form.netlify.app',
-  name: 'nü form',
-  tagline: '', // déjà dans le logo
+  // Vide tant que l'URL n'est pas connue : pas de balise canonique ni d'og:image.
+  siteUrl: '',
+  name: 'TWENTY ONE',
+  tagline: 'Pilates Reformer • Dijon',
+  // Affiché à gauche du nom. Fond transparent : la forme est peinte dans la couleur du texte.
+  // null : le nom seul.
   logo: 'logo.png',
-  address: '11 place Aristide Briand, 72000 Le Mans',
-  legalName: 'NU FORM',
-  email: 'contact@nuform-pilates.com',
+  address: '7 passage darcy, 21000 Dijon',
+  legalName: 'TWENTY ONE PILATES REFORMER STUDIO',
+  email: '21pilatesdijon@gmail.com',
   legal: {
     form: 'SAS',
-    capital: '1 000 €',
+    capital: '',
     headOffice: '',
-    registration: 'RCS Le Mans 101 168 359 (SIRET 101 168 359 00012)',
-    vat: 'FR43101168359',
-    publicationDirector: 'Sinda El Yaagoubi, dirigeante',
+    registration: '[ RCS Ville 123 456 789 (SIRET …) ]',
+    vat: 'FR44942005067',
+    publicationDirector: 'Btissam Bataoui, co-fondatrice',
     host: {
-      name: 'Netlify, Inc.',
-      address: '101 2nd Street, San Francisco, CA 94105, États-Unis',
-      // Netlify ne publie aucun numéro : contact écrit uniquement.
+      name: 'Vercel Inc.',
+      address: '440 N Barranca Ave #4133, Covina, CA 91723, États-Unis',
+      // Vercel ne publie aucun numéro : contact écrit uniquement.
       phone: '',
     },
   },
 
-  phone: '+33243208733',
-  phoneDisplay: '02 43 20 87 33',
-  phoneAlt: 'Tu préfères appeler ?',
+  phone: '+33756944939',
+  phoneDisplay: '07 56 94 49 39',
+  phoneAlt: 'Tu préfères appeler ?',
 
-  cta: { label: 'Demander ma séance à {price}' },
+  cta: {
+    label: 'Réserver ma séance',
+    url: 'https://momence.com/m/830651',
+    note: 'Réservé à une première séance. Valable 15 jours après le paiement.',
+  },
 
   meta: {
-    title: 'Nü Form - Studio Pilates · Séance découverte à 15 €',
-    description: 'Studio Pilates nü form au Mans : ta première séance Reformer, Nü Sculpt ou Hot Pilates à 15 €. Laisse ton numéro, le studio te rappelle pour choisir le créneau.',
+    title: 'Séance découverte Pilates Reformer à {price} · Twenty One Dijon',
+    description: 'Découvre le Pilates Reformer chez Twenty One, au cœur de Dijon : ta première séance à {price}, en petit groupe de 6, à réserver en ligne.',
     image: {
-      file: 'boutique.jpg',
-      subject: 'Devanture du studio',
-      alt: 'Devanture orange du studio nü form, place Aristide Briand au Mans',
+      file: null,
+      subject: '[ Image de partage, 1200 × 630 ]',
+      alt: '',
     },
   },
 
   hero: {
-    // Provisoire : à remplacer par l'accroche de l'annonce Meta dès qu'elle est fixée.
-    title: 'Découvre le Pilates,\n**au cœur du Mans.**',
+    // Reprend l'accroche de l'annonce Meta.
+    title: 'Découvre \n**le reformer**, \n*au cœur de Dijon.*',
     photo: {
-      file: "studio7.jpeg",
-      subject: 'Photo hero - visuel de campagne, plan rapproché, tenue orange',
-      alt: 'Pratiquante en tenue orange siglée nü form, allongée sur un reformer',
+      file: 'coach-correction.jpg',
+      subject: 'Photo hero',
+      alt: 'Une coach corrige la posture d’une élève allongée sur un reformer, dans la salle aux miroirs en arche',
+      focus: '45% center',
     },
   },
 
   offer: {
-    price: '15',
-    priceLabel: 'ta séance découverte',
-    perks: ['Reformer · Nü Sculpt · Hot Pilates', 'Réservée à une première visite'],
+    price: '25',
+    priceLabel: 'Séance découverte',
+    // Une ligne par élément, ex. 'Réservée à une première visite'.
+    perks: [],
   },
 
-  form: {
-    name: 'seance-decouverte',
-    title: 'Laisse ton numéro, on te rappelle',
-    text: 'Le studio te rappelle pour choisir le créneau de ta séance.',
-    firstNameLabel: 'Prénom',
-    phoneLabel: 'Téléphone',
-    phoneHint: 'Par exemple 06 12 34 56 78',
-    submit: 'Envoyer ma demande',
-    sending: 'Envoi en cours…',
-    privacy: 'Ton prénom et ton numéro servent uniquement à te recontacter pour cette séance.',
-    success: {
-      title: 'C’est noté !',
-      text: 'Le studio te rappelle pour choisir le créneau de ta séance découverte.',
-    },
-    error: 'L’envoi n’a pas fonctionné. Réessaie dans un instant, ou appelle directement le studio.',
-    // Référentiel CNIL « gestion commerciale » : 3 ans après le dernier contact
-    // pour un prospect. Validé avec le studio en octobre 2026.
-    retention: '3 ans à compter de notre dernier échange',
-  },
-
+  // Faits vérifiables uniquement. Ex. { text: '8 places par cours', mobile: true }.
+  // Mobile : trois éléments sur une ligne ; le quatrième n'apparaît que sur ordinateur.
   reassurance: [
-    // Nombre réel de reformers par cours. Ne jamais l'arrondir à la baisse.
-    { text: '8 places par cours', mobile: true },
-    { text: 'Séances de 50 min', mobile: true },
-    { text: 'Coachs certifiées', mobile: true },
+    { text: '6 places par cours', mobile: true },
+    { text: '50 min par séance', mobile: true },
+    { text: '3 coachs', mobile: true },
     { text: '7 j / 7', mobile: false },
   ],
+  
 
   sections: {
     offer: {
       eyebrow: 'La séance découverte',
-      title: 'Ta première séance, **à {price}**',
-      text: '',
+      title: 'Ta première séance, *à {price}*',
+      text: 'Une séance de reformer en petit groupe, pour découvrir le studio et la méthode.',
+      // Valeur entre crochets : à relever auprès du studio ou sur Momence.
       facts: [
-        { label: 'Cours', value: 'Reformer · Nü Sculpt · Hot Pilates' },
+        { label: 'Cours', value: 'Reformer' },
         { label: 'Durée', value: '50 min' },
-        { label: 'Groupe', value: "8 places par cours" },
+        { label: 'Groupe', value: '6 places par cours' },
         { label: 'Pour qui', value: 'Première visite au studio' },
-        { label: 'Tarif', value: '{price}' },
+        { label: 'Validité', value: '15 jours après le paiement' },
+        { label: 'Tarif', value: '{price}.' },
       ],
       steps: [
-        'Tu laisses ton prénom et ton numéro.',
-        'Le studio te rappelle pour choisir le créneau.',
-        'Tu viens découvrir le cours de ton choix.',
+        'Tu règles {price} en ligne pour confirmer ta place.',
+        'Tu choisis ton créneau sur Momence.',
+        'Tu viens au studio pour ta première séance.',
       ],
     },
     studio: {
       eyebrow: 'Le studio',
-      title: 'Nü Form Studio Pilates, en photo',
-      text: '',
-      swipeHint: 'Faites glisser pour parcourir',
+      title: 'Un studio *à taille humaine*',
+      text: 'Au 7 passage Darcy, à Dijon : des cours de reformer à six au plus, avec un coach du studio, 7 jours sur 7.',
+      swipeHint: 'Fais glisser pour voir le studio',
+      // Six photos au plus (deux rangées de trois). Section masquée si vide.
+      // Pour chaque photo livrée :
+      // file: 'salle.jpg' (dans src/assets/studio/) et alt descriptif.
       photos: [
-        { file: "studio10.jpeg", subject: 'Photo - accueil, vestiaire', alt: 'Salle de reformers sous des puits de lumière, logo nü form au mur' },
-        { file: 'studio2.jpg', subject: 'Photo - reformers', alt: 'Reformers noirs alignés, sangles rouges et logo nü form gravé sur le cadre' },
-        { file: "studio3.jpg", subject: 'Photo - mur, décoration et accessoires', alt: 'Mur d’accessoires sous l’enseigne nü form Studio Pilates : ballons et tapis siglés' },
-        { file: 'studio1.jpg', subject: 'Photo - la salle, reformers', alt: 'Reformers devant un mur de ballons et de tapis nü form rangés' },
-        { file: "studio12.jpg", subject: 'Photo - ', alt: 'Une coach guide une pratiquante allongée sur un reformer' },
-        { file: "studio6.jpeg", subject: 'Photo - accessoires', alt: 'Tapis caramel marqué nü form Studio Pilates, en gros plan' },
-
+        {
+          file: 'studio-accueil.jpg',
+          subject: 'L\'accueil du studio',
+          alt: 'Le coin accueil : canapé crème, table basse fleurie et comptoir en bois clair',
+        },
+        {
+          file: 'reformer-pose.JPG',
+          subject: 'Un exercice allongé',
+          alt: 'Exercice allongé sur un reformer, un ballon rose sous le genou et la jambe tendue',
+          focus: 'center 60%',
+        },
+        {
+          file: 'reformer-machine.jpg',
+          subject: 'Un reformer',
+          alt: 'Un reformer blanc marqué Twenty One, devant le mur de ballons et cercles roses',
+        },
+        {
+          file: 'groupe-clientes.jpg',
+          subject: 'Un moment entre clientes',
+          alt: 'Six femmes en tenue de sport discutent en riant, assises sur les reformers, une boisson à la main',
+          focus: 'center 40%',
+        },
+        {
+          file: 'fondatrices-exercice.JPG',
+          subject: 'Un exercice en duo',
+          alt: 'Les fondatrices à genoux sur deux reformers, un ballon rose entre les mains',
+          focus: 'center 55%',
+        },
+        {
+          file: 'studio-vestiaires.jpg',
+          subject: 'Les vestiaires',
+          alt: 'Les vestiaires : casiers en bois, vasque blanche et paniers de serviettes',
+        },
       ],
     },
     session: {
-      eyebrow: 'Le jour J',
-      title: 'Comment se passe *ta* séance',
+      eyebrow: '[ Surtitre du déroulé ]',
+      title: '[ Titre du déroulé ]',
       text: '',
       // Le déroulé réel, validé par le studio. Jamais reconstitué de mémoire.
       // Vide : section masquée. Une entrée par étape, dans l'ordre :
@@ -339,106 +353,150 @@ export const studio: Studio = {
       title: 'Avant ta première séance',
     },
     team: {
-      eyebrow: 'L’équipe',
-      title: 'Qui va t’accompagner.',
+      eyebrow: '[ Surtitre de l’équipe ]',
+      title: '[ Titre de l’équipe ]',
     },
     final: {
-      title: 'Cette première séance,\n**on la planifie ensemble ?**',
-      text: 'Laisse ton prénom et ton numéro : le studio te rappelle pour choisir le créneau.',
+      title: 'Six places par cours,\n *réserve la tienne*',
+      text: 'Choisis ton créneau sur Momence et règle {price} en ligne. Ta séance reste valable 15 jours après le paiement.',
+      // null : aucune. `focus` règle le cadrage, ex. 'center 35%'.
       storefront: {
-        file: 'boutique.jpg',
-        subject: 'Devanture du studio',
-        alt: 'Devanture orange du studio nü form, place Aristide Briand',
+        file: 'salle-reformers.JPG',
+        subject: 'La salle et les reformers',
+        alt: 'La salle du studio : reformers alignés, ballons roses, miroirs en arche et plafond drapé',
       },
+      // Zéro ou quatre photos carrées. Ex. { file: 'accueil.jpg', subject: 'Photo carrée 1', alt: '…' }.
       photos: [
-        { file: 'studio13.png', subject: 'Photo carrée 1', alt: 'Coin café du studio : comptoir en inox et mur orange au logo nü form' },
-        { file: 'studio11.jpg', subject: 'Photo carrée 2', alt: 'Trois pratiquantes en étirement, un bras tendu vers le plafond' },
-        { file: 'studio15.jpg', subject: 'Photo carrée 3', alt: 'Séance en plein air sur tapis nü form, lests aux chevilles' },
-        { file: 'studio14.png', subject: 'Photo carrée 4', alt: 'Espace d’accueil avec fauteuils, tables et enseigne lumineuse nü form' },
+        {
+          file: 'portrait-fondatrices.JPG',
+          subject: 'Les fondatrices',
+          alt: 'Les deux fondatrices du studio, souriantes, assises sur un reformer avec un ballon rose',
+          focus: 'center 35%',
+        },
+        {
+          file: 'reformer-accessoires.JPG',
+          subject: 'Le mur d\'accessoires',
+          alt: 'Un reformer devant le mur d’accessoires : ballons et cercles roses, miroir en arche éclairé',
+          focus: 'center 40%',
+        },
+        {
+          file: 'ambiance-post-seance.jpg',
+          subject: 'Après la séance',
+          alt: 'Trois boissons glacées aux couleurs du studio, posées sur un reformer : café, matcha, smoothie rose',
+        },
+        {
+          file: 'portrait-btissam.JPG',
+          subject: 'Un exercice avec accessoire',
+          alt: 'Une pratiquante à genoux sur un reformer tient un cercle de Pilates rose',
+          focus: 'center 30%',
+        },
+        
       ],
     },
   },
 
   // Uniquement des avis réels, copiés depuis leur source. Ne jamais en inventer.
+  // Section masquée tant que la liste est vide. Une entrée par avis :
+  // { text: '…', author: 'Prénom', source: 'Google', date: 'Mois 2026', rating: 5 },
+  // Les emplacements (placeholder: true) s'affichent marqués « Avis d'exemple » :
+  // les remplacer par de vrais avis, ou les supprimer, avant la mise en ligne.
   reviews: [
     {
-      text: 'Je suis déjà venue plusieurs fois pour prendre une boisson et aujourd’hui pour la première fois pour tester le pilate. Je ne peux que recommander ! La déco est top et le personnel hyper accueillant :)',
-      author: 'Alexandra',
+      text: 'Première expérience en Pilates Reformer et j’ai adoré ! Un grand merci à Sanaë pour son professionnalisme, sa douceur et son accompagnement tout au long de la séance. Les exercices étaient variés, exigeants et très efficaces. Le studio est agréable, le matériel est impeccable et de grande qualité. Une très belle découverte que je recommande sans hésiter. J’ai déjà hâte de revenir !',
+      author: 'Corine',
       source: 'Google',
       date: 'Juillet 2026',
       rating: 5,
+      placeholder: false,
     },
     {
-      text: 'Pour avoir testé plusieurs studio de Pilate sur Le Mans je dois dire que ce studio est de loin le meilleur. Les lieux sont propres, accueillants et chaleureux. Inès est qualifié, professionnelle et gentille et très agréable. Je recommande +++',
-      author: 'Charlène',
+      text: 'Première séance de Pilates pour moi et j’ai adoré ! La coach est très gentille, patiente et explique super bien. Le petit groupe rend le cours très agréable et rassurant. Je recommande à 100 % !',
+      author: 'Amandine',
       source: 'Google',
-      date: 'Mai 2026',
+      date: 'Janvier 2026',
       rating: 5,
+      placeholder: false,
     },
     {
-      text: "Une première expérience super! Test d'une séance reformer avec Johanna qui sait mettre en confiance, booster et motiver dans la bonne humeur! Et un accueil très chaleureux accompagné d'un matcha savoureux ensuite. Hâte d'y retourner !",
-      author: 'Marguerite',
+      text: '1er cours de pilate reformer incroyable! Merci Manale! Une coach attentive, bienveillante et à la voix douce. Séance super intense. Exercices au top. Lieu et matériel de très bonne qualité. Je recommande ++ je reviendrai :)',
+      author: 'Mathilde',
       source: 'Google',
-      date: 'Avril 2026',
+      date: 'Juin 2026',
       rating: 5,
+      placeholder: false,
     },
     {
-      text: "J'ai testé ce super endroit avec ma copine, et on a adoré 😊. L'accueil était vraiment chaleureux. L'espace est lumineux, les boissons sont délicieuses, et j'ai redécouvert mon amour pour le matcha.  J'ai déjà hâte d'y retourner pour prolonger l'expérience Nü Form 🧡",
+      text: 'Agréable séance pour une découverte du Pilate reformer. Lieux cosy, la coach nous corrige avec douceur ce qui met très à l’aise.',
       author: 'Anais',
       source: 'Google',
       date: 'Avril 2026',
       rating: 5,
+      placeholder: false,
     },
     {
-      text: "Une découverte fantastique ! Les cours de Nu Form sont d'une qualité exceptionnelle, et Inès est une coach attentive et professionnelle qui prodigue d'excellents conseils. L'ambiance et l'accueil sont formidables, et le concept Pilates + café est tout simplement génial. J'ai particulièrement adoré le Pink Matcha en fin de séance 😍 Je recommande vivement !",
+      text: "Ce studio est une véritable révélation! L'ambiance est incroyable, à la fois girly, chaleureuse et apaisante. Les coach sont non seulement professionnelles mais aussi très attentives aux besoins de chaque participant. Les séances sont variées et adaptées à tous les niveaux. On se sent toujours accueil avec bienveillance ! Je recommande vivement, allez-y les yeux fermés ! 😊",
       author: 'Anissa',
       source: 'Google',
-      date: 'Mai 2026',
+      date: 'Juillet 2025',
       rating: 5,
+      placeholder: false,
     },
     {
-      text: "Le studio de Pilates est impeccable et incroyablement bien équipé. Les boissons sont tout simplement délicieuses et, surtout, saines. Le personnel est charmant et attentionné. Si vous souhaitez passer un moment agréable et paisible, vous pouvez être sûr que cet endroit deviendra votre nouveau lieu de prédilection 😝",
-      author: 'Romane',
+      text: "Première séance aujourd'hui et j'étais agréablement surprise. La complexité des mouvements et de l'équilibre rendent la séance très intense et intéressante. Je reviendrai certainement",
+      author: 'Logan',
       source: 'Google',
-      date: 'Août 2026',
+      date: 'Décembre 2025',
       rating: 5,
+      placeholder: false,
+    },
+    {
+      text: "Si vous hésitez à réserver ? Sautez le pas vous ne le regretterez pas ! J’ai commencé ma première séance il y’a deux semaines et je suis déjà accro 🥰❤️ !!!! Une fois l’appréhension du reformer passé vous allez adorer ! Sanaë et Faiza sont bienveillantes et patientes dans la réalisation des mouvements ! Superbe expérience ❤️❤️",
+      author: 'Ingrid',
+      source: 'Google',
+      date: 'Juillet 2025',
+      rating: 5,
+      placeholder: false,
     },
   ],
 
   // Uniquement des réponses vérifiées auprès du studio. Une réponse entre
   // crochets s'affiche telle quelle et déclenche un avertissement au build.
   // Pas de doublon avec le reste de la page (prix, durée, groupe, réservation,
-  // données personnelles y sont déjà).
+  // données personnelles y sont déjà). Vide : FAQ masquée.
+  // { question: '…', answer: '…' },
+  // Questions courantes avant un premier cours de reformer. Réponses à faire
+  // valider par le studio ; supprimer celles qui ne s'appliquent pas.
   faq: [
     {
-      question: 'Je n’ai jamais fait de Pilates, est-ce pour moi ?',
-      answer: 'Oui, bien sûr : la séance découverte est ouverte aux débutantes. La coach s’adapte et prend en compte le niveau de chacune.',
+      question: "Le Pilates Reformer, c'est pour qui ?",
+      answer: "Pour toutes. Débutantes, sportives confirmées, mamans en post-partum, dos fragiles, personnes en reprise d'activité. Le Reformer s'adapte à chaque corps, et nos coachs s'adaptent à chaque personne. Aucun niveau minimum requis.",
     },
     {
-      question: 'Y a-t-il un engagement après la séance ?',
-      answer: 'Aucun : la séance découverte n’engage à rien. Elle sert à découvrir le Pilates à travers l’expérience nü form. Après le cours, on prend le temps de discuter de ton ressenti.',
+      question: 'Que dois-je apporter ?',
+      answer: "Une tenue confortable et des chaussettes antidérapantes (en vente à l'accueil). Le reste, serviettes, coin beauté, boissons bien-être (matcha, collagène, protéines), on s'en occupe.",
     },
     {
-      question: 'À quels horaires sont les cours ?',
-      answer: 'Des cours sont proposés le matin, en journée et en soirée, pour s’adapter à tous les rythmes.',
+      question: 'Pourquoi seulement 6 places par séance ?',
+      answer: "Parce que c'est la seule façon d'assurer un vrai suivi personnalisé. Au-delà de 6 personnes, il est impossible pour une coach de voir tout le monde, de corriger chaque posture, d'adapter chaque exercice. Ce choix, c'est notre engagement envers toi.",
     },
     {
-      question: 'Où se trouve le studio ? Où se garer ?',
-      answer: '11 place Aristide Briand, en hyper-centre du Mans. Plusieurs parkings payants se trouvent juste en face et à proximité, ainsi que des places en voirie aux alentours.',
+      question: 'Comment venir au studio ?',
+      answer: '7 Passage Darcy, 21000 Dijon. En tram : arrêt Darcy (T1 et T2). En voiture : parkings Grangier et Darcy à 2 min. Un ticket de stationnement 2h et un ticket de tram sont offerts à chaque séance.',
     },
     {
       question: 'Y a-t-il des vestiaires et des douches ?',
-      answer: 'Oui, le studio a des vestiaires et des douches.',
+      answer: 'Oui, le studio est équipé de vestiaires et douches.',
     },
   ],
 
-  googleReview: { rating: 4.9, count: 98 },
+  // Note relevée sur la fiche Google, avec les avis. Ex. { rating: 4.9, count: 98 }.
+  googleReview: { rating: 5, count: 18 },
 
   // Section masquée tant que la liste est vide. Une entrée par coach :
   // {
-  //   firstName: 'Johanna',
+  //   firstName: 'Prénom',
   //   certification: 'Certifiée Pilates reformer',
-  //   photo: { file: 'coach-johanna.jpg', subject: 'Portrait', alt: 'Johanna, coach, dans la salle de reformers' },
+  //   photo: { file: 'coach-prenom.jpg', subject: 'Portrait', alt: 'Prénom, coach, dans la salle' },
   // },
   coaches: [],
 };

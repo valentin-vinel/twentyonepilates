@@ -2,7 +2,8 @@ import type { ImageMetadata } from 'astro';
 import type { PhotoSlot } from '../config/studio';
 
 const files = import.meta.glob<{ default: ImageMetadata }>(
-  '../assets/studio/*.{jpg,jpeg,png,webp,avif}',
+  // Extensions en minuscules ou en majuscules (« .JPG » des appareils photo).
+  '../assets/studio/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}',
   { eager: true },
 );
 

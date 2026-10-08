@@ -43,8 +43,8 @@ if (!pixelId) {
     // Événements une seule fois par session, l'eventID conservé pour la
     // déduplication avec la CAPI :
     // - Contact : premier clic sur un lien tel:. Un clic n'est pas un appel décroché.
-    // - Lead : demande de rappel envoyée (LeadForm.astro), qui fournit son eventID,
-    //   aussi transmis avec la demande. Une demande n'est pas une séance réservée.
+    // - InitiateCheckout : premier clic vers la réservation Momence (CtaButton.astro).
+    //   Un clic n'est pas une séance réservée : la réservation se fait sur Momence.
     // Aucun des deux n'est une conversion.
     // Sans consentement, le pixel n'est pas chargé : rien n'est marqué comme
     // envoyé, pour qu'une action après acceptation déclenche bien l'événement.

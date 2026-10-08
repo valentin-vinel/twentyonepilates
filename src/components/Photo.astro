@@ -33,6 +33,7 @@ const src = resolvePhoto(photo);
         loading={priority ? 'eager' : 'lazy'}
         decoding={priority ? 'sync' : 'async'}
         fetchpriority={priority ? 'high' : 'auto'}
+        style={photo.focus && `object-position: ${photo.focus}`}
       />
     ) : (
       <p class="photo__subject">[ {photo.subject} ]</p>

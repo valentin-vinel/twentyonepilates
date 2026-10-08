@@ -1,6 +1,9 @@
 ---
 import Landing from '../layouts/Landing.astro';
+import { brand } from '../config/brand';
 import { studio } from '../config/studio';
+import { placeholders } from '../lib/placeholders';
+import { fill } from '../lib/text';
 import Hero from '../components/Hero.astro';
 import Reassurance from '../components/Reassurance.astro';
 import Discovery from '../components/Discovery.astro';
@@ -20,9 +23,16 @@ if (studio.reviews.some((review) => review.placeholder)) {
 if (studio.faq.some((item) => /\[.*\]/.test(item.answer))) {
   console.warn('\n⚠  Des réponses de la FAQ sont encore entre crochets : à faire valider par le studio.\n');
 }
+const todo = [
+  ...placeholders(studio).map((path) => `studio.${path}`),
+  ...placeholders(brand).map((path) => `brand.${path}`),
+];
+if (todo.length > 0) {
+  console.warn(`\n⚠  ${todo.length} placeholders entre crochets à remplir :\n   ${todo.join('\n   ')}\n`);
+}
 ---
 
-<Landing title={studio.meta.title} description={studio.meta.description} noindex>
+<Landing title={fill(studio.meta.title)} description={fill(studio.meta.description)} noindex>
   <main>
     <Hero />
     <Reassurance />

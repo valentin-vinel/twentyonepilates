@@ -1,10 +1,8 @@
 ---
 import { studio } from '../config/studio';
 import { titleHtml } from '../lib/text';
-import CtaButton from './CtaButton.astro';
-import LeadForm from './LeadForm.astro';
+import BookingCta from './BookingCta.astro';
 import Logo from './Logo.astro';
-import PhoneAlt from './PhoneAlt.astro';
 import Photo from './Photo.astro';
 
 const { hero, offer } = studio;
@@ -29,17 +27,13 @@ const { hero, offer } = studio;
         <span class="badge__value">{offer.price}&nbsp;€</span>
         <span class="badge__label">{offer.priceLabel}</span>
       </p>
-      <ul class="hero__perks">
-        {offer.perks.map((perk) => <li>{perk}</li>)}
-      </ul>
+      {offer.perks.length > 0 && (
+        <ul class="hero__perks">
+          {offer.perks.map((perk) => <li>{perk}</li>)}
+        </ul>
+      )}
     </div>
 
-    <!-- Ordinateur : le formulaire, juste en dessous, remplace le bouton. -->
-    <div class="hero__actions only-mobile">
-      <CtaButton variant="dark" />
-      <PhoneAlt class="hero__phone" />
-    </div>
+    <BookingCta class="hero__booking" />
   </div>
-
-  <LeadForm class="hero__form" />
 </section>

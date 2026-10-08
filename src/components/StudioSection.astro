@@ -20,63 +20,65 @@ const slides = await Promise.all(
 const zoomable = slides.filter((slide) => slide !== null);
 ---
 
-<section class="section section--soft" aria-labelledby="studio-titre">
-  <div class="wrap">
-    <p class="eyebrow">{eyebrow}</p>
-    <h2 class="title" id="studio-titre" set:html={titleHtml(title)} />
+{photos.length > 0 && (
+  <section class="section" aria-labelledby="studio-titre">
+    <div class="wrap">
+      <p class="eyebrow">{eyebrow}</p>
+      <h2 class="title" id="studio-titre" set:html={titleHtml(title)} />
 
-    <ul class="gallery" aria-label="Photos du studio">
-      {photos.map((photo, i) => {
-        const slide = slides[i];
-        const image = (
-          <Photo
-            photo={photo}
-            class="gallery__photo"
-            widths={[320, 480, 720]}
-            sizes="(min-width: 860px) 370px, 72vw"
-          />
-        );
-        return (
-          <li>
-            {slide ? (
-              <button
-                type="button"
-                class="gallery__open"
-                data-index={zoomable.indexOf(slide)}
-                aria-label={`Agrandir : ${slide.alt}`}
-              >
-                {image}
-              </button>
-            ) : (
-              image
-            )}
-          </li>
-        );
-      })}
-    </ul>
+      <ul class="gallery" aria-label="Photos du studio">
+        {photos.map((photo, i) => {
+          const slide = slides[i];
+          const image = (
+            <Photo
+              photo={photo}
+              class="gallery__photo"
+              widths={[320, 480, 720]}
+              sizes="(min-width: 860px) 270px, 58vw"
+            />
+          );
+          return (
+            <li>
+              {slide ? (
+                <button
+                  type="button"
+                  class="gallery__open"
+                  data-index={zoomable.indexOf(slide)}
+                  aria-label={`Agrandir : ${slide.alt}`}
+                >
+                  {image}
+                </button>
+              ) : (
+                image
+              )}
+            </li>
+          );
+        })}
+      </ul>
 
-    <p class="gallery__hint only-mobile" aria-hidden="true">{swipeHint}</p>
-    {text && <p class="lead">{text}</p>}
-  </div>
+      <p class="gallery__hint only-mobile" aria-hidden="true">{swipeHint}</p>
+      {text && <p class="lead">{text}</p>}
+    </div>
 
-  {zoomable.length > 0 && (
-    <dialog class="lightbox" id="lightbox" aria-label="Photos du studio en grand">
-      <figure class="lightbox__figure">
-        {/* Source fixée au clic, depuis les URL générées par getImage ci-dessus. */}
-        <img class="lightbox__img" alt="" decoding="async" />
-      </figure>
-      <p class="lightbox__count" aria-live="polite"></p>
-      <button type="button" class="lightbox__btn lightbox__close" data-action="close" aria-label="Fermer">×</button>
-      {zoomable.length > 1 && (
-        <>
-          <button type="button" class="lightbox__btn lightbox__prev" data-action="prev" aria-label="Photo précédente">‹</button>
-          <button type="button" class="lightbox__btn lightbox__next" data-action="next" aria-label="Photo suivante">›</button>
-        </>
-      )}
-      <script is:inline type="application/json" id="lightbox-data" set:html={JSON.stringify(zoomable)} />
-    </dialog>
-  )}
-</section>
+    {zoomable.length > 0 && (
+      <dialog class="lightbox" id="lightbox" aria-label="Photos du studio en grand">
+        <figure class="lightbox__figure">
+          {/* Source fixée au clic, depuis les URL générées par getImage ci-dessus. */}
+          <img class="lightbox__img" alt="" decoding="async" />
+        </figure>
+        <p class="lightbox__count" aria-live="polite"></p>
+        <button type="button" class="lightbox__btn lightbox__close" data-action="close" aria-label="Fermer">×</button>
+        {zoomable.length > 1 && (
+          <>
+            <button type="button" class="lightbox__btn lightbox__prev" data-action="prev" aria-label="Photo précédente">‹</button>
+            <button type="button" class="lightbox__btn lightbox__next" data-action="next" aria-label="Photo suivante">›</button>
+          </>
+        )}
+        <script is:inline type="application/json" id="lightbox-data" set:html={JSON.stringify(zoomable)} />
+      </dialog>
+    )}
+  </section>
+)}
 
 <script>
   const dialog = document.getElementById('lightbox') as HTMLDialogElement | null;

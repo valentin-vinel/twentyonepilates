@@ -4,14 +4,56 @@ import { fill } from '../lib/text';
 
 /**
  * Le seul appel à l'action de la page : même libellé partout, même cible,
- * le formulaire de demande de rappel (LeadForm.astro).
+ * la réservation de la séance découverte sur Momence (lien externe, même onglet).
+ *
+ * Au clic : les UTM de l'arrivée sont ajoutés au lien, pour que la
+ * réservation garde la trace de l'annonce ; fbclid seulement si le pixel est
+ * chargé, donc après consentement. L'événement InitiateCheckout part une fois
+ * par session. Un clic n'est pas une séance réservée : la réservation se fait
+ * sur Momence, hors de cette page.
  */
 interface Props {
-  variant?: 'accent' | 'dark' | 'light';
+  variant?: 'dark' | 'light';
   class?: string;
 }
 
-const { variant = 'accent', class: className } = Astro.props;
+const { variant, class: className } = Astro.props;
 ---
 
-<a class:list={['btn', `btn--${variant}`, className]} href="#rappel">{fill(studio.cta.label)}</a>
+<a class:list={['btn', variant && `btn--${variant}`, className]} href={studio.cta.url} data-booking>
+  {fill(studio.cta.label)}
+</a>
+
+<script>
+  const w = window as any;
+
+  function session(key: string): string {
+    try { return sessionStorage.getItem(key) || ''; } catch { return ''; }
+  }
+
+  function bookingUrl(href: string): string {
+    let url: URL;
+    try { url = new URL(href); } catch { return href; }
+    for (const key of ['utm_source', 'utm_campaign', 'utm_content']) {
+      const value = session(key);
+      if (value && !url.searchParams.has(key)) url.searchParams.set(key, value);
+    }
+    const fbclid = session('fbclid');
+    if (w.__pixelLoaded && fbclid && !url.searchParams.has('fbclid')) url.searchParams.set('fbclid', fbclid);
+    return url.href;
+  }
+
+  document.addEventListener('click', (event) => {
+    const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[data-booking]');
+    if (!link) return;
+    link.href = bookingUrl(link.href);
+    if (!w.__pixelLoaded) return;
+
+    w.__trackOnce?.('InitiateCheckout');
+    // Clic simple dans le même onglet : on laisse 150 ms au pixel pour partir
+    // avant de quitter la page. Ctrl/Cmd-clic ou clic milieu : rien à attendre.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setTimeout(() => { location.href = link.href; }, 150);
+  });
+</script>

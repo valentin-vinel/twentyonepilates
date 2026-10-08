@@ -1,7 +1,6 @@
 ---
 import { brand } from '../config/brand';
 import { studio } from '../config/studio';
-import '../styles/fonts.css';
 import '../styles/global.css';
 import { getImage } from 'astro:assets';
 import ConsentBanner from '../components/ConsentBanner.astro';
@@ -21,29 +20,35 @@ const ogImage =
     ? await getImage({ src: ogSource, width: 1200, height: 630, fit: 'cover', format: 'jpg' })
     : undefined;
 
-const { colors, fonts } = brand;
-const rootVars = `:root{
-  --c-bg:${colors.bg};
-  --c-surface:${colors.surface};
-  --c-ink:${colors.ink};
-  --c-muted:${colors.muted};
-  --c-accent:${colors.accent};
-  --c-accent-ink:${colors.accentInk};
-  --c-accent-soft:${colors.accentSoft};
-  --c-peach:${colors.peach};
-  --c-deep:${colors.deep};
-  --c-deep-ink:${colors.deepInk};
-  --c-border:${colors.border};
-  --f-heading:${fonts.heading};
-  --f-body:${fonts.body};
-  --f-accent-serif:${fonts.accentSerif};
-  --radius:${brand.radius};
-  --max-w:${brand.maxWidth};
+const { colors, fonts, easing, fontFaces } = brand;
+// Polices servies en local depuis public/fonts/ (licences OFL à côté des fichiers).
+const fontFaceCss = fontFaces
+  .map(
+    (face) =>
+      `@font-face{font-family:"${face.family}";src:url('/fonts/${face.file}') format('woff2');` +
+      `font-weight:${face.weight};font-style:${face.style};font-display:swap}`,
+  )
+  .join('\n');
+const preloadFont = fontFaces.find((face) => face.preload);
+
+// Chaque token de brand.ts devient une variable CSS : bgAlt → --c-bg-alt.
+const kebab = (key: string) => key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+const vars = (prefix: string, group: Record<string, string>) =>
+  Object.entries(group).map(([key, value]) => `  --${prefix}-${kebab(key)}:${value};`);
+const rootVars = `${fontFaceCss}
+:root{
+${[
+  ...vars('c', colors),
+  ...vars('f', fonts),
+  ...vars('ease', easing),
+  `  --radius:${brand.radius};`,
+  `  --max-w:${brand.maxWidth};`,
+].join('\n')}
 }`;
 ---
 
 <!doctype html>
-<html lang="fr">
+<html lang="fr" data-theme={brand.theme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -64,10 +69,10 @@ const rootVars = `:root{
         <meta property="og:image:alt" content={studio.meta.image!.alt} />
       </>
     )}
-    {studio.siteUrl && <link rel="canonical" href={new URL(Astro.url.pathname, studio.siteUrl).href} />}
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="96x96" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/jost-variable.woff2" />
+    {studio.siteUrl && <link rel="canonical" href={new URL(Astro.url.pathname, studio.siteUrl).href} />}
+    {preloadFont && <link rel="preload" as="font" type="font/woff2" crossorigin href={`/fonts/${preloadFont.file}`} />}
     <style is:global set:html={rootVars}></style>
     <MetaPixel />
   </head>
