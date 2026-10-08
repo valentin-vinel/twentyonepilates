@@ -1,0 +1,45 @@
+---
+import { studio } from '../config/studio';
+import { titleHtml } from '../lib/text';
+import CtaButton from './CtaButton.astro';
+import LeadForm from './LeadForm.astro';
+import Logo from './Logo.astro';
+import PhoneAlt from './PhoneAlt.astro';
+import Photo from './Photo.astro';
+
+const { hero, offer } = studio;
+---
+
+<section class="hero" id="hero">
+  <Photo
+    photo={hero.photo}
+    class="hero__photo"
+    widths={[480, 800, 1200, 1600]}
+    sizes="(min-width: 860px) 50vw, 100vw"
+    priority
+  />
+
+  <div class="hero__content">
+    <Logo full class="hero__logo" />
+
+    <h1 class="display hero__title" set:html={titleHtml(hero.title)} />
+
+    <div class="hero__offer">
+      <p class="badge">
+        <span class="badge__value">{offer.price}&nbsp;€</span>
+        <span class="badge__label">{offer.priceLabel}</span>
+      </p>
+      <ul class="hero__perks">
+        {offer.perks.map((perk) => <li>{perk}</li>)}
+      </ul>
+    </div>
+
+    <!-- Ordinateur : le formulaire, juste en dessous, remplace le bouton. -->
+    <div class="hero__actions only-mobile">
+      <CtaButton variant="dark" />
+      <PhoneAlt class="hero__phone" />
+    </div>
+  </div>
+
+  <LeadForm class="hero__form" />
+</section>

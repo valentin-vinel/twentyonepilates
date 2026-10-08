@@ -1,0 +1,46 @@
+---
+import { studio } from '../config/studio';
+import { fill } from '../lib/text';
+import CtaButton from './CtaButton.astro';
+
+/**
+ * Appel à l'action fixe. Mobile : barre pleine largeur. Ordinateur : bulle en
+ * bas à droite, qui déplie le libellé au survol ou au focus.
+ * Même cible et même libellé que les autres boutons : le formulaire.
+ */
+---
+
+<div class="mobilebar" data-sticky data-visible="false">
+  <CtaButton class="mobilebar__btn" />
+</div>
+
+<a class="bubble" data-sticky data-visible="false" href="#rappel">
+  <span class="bubble__label">{fill(studio.cta.label)}</span>
+  <svg class="bubble__icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+    <path
+      d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"
+    />
+  </svg>
+</a>
+
+<script>
+  // Masqués tant que le hero ou l'un des formulaires est à l'écran (ils suffisent),
+  // affichés partout ailleurs jusqu'en bas de la page.
+  const stickies = document.querySelectorAll<HTMLElement>('[data-sticky]');
+  const targets = ['hero', 'rappel', 'rappel-bas']
+    .map((id) => document.getElementById(id))
+    .filter((el): el is HTMLElement => el !== null);
+  const onScreen = new Set<Element>();
+
+  if (stickies.length && targets.length) {
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) onScreen.add(entry.target);
+        else onScreen.delete(entry.target);
+      }
+      const visible = String(onScreen.size === 0);
+      stickies.forEach((el) => (el.dataset.visible = visible));
+    });
+    targets.forEach((el) => observer.observe(el));
+  }
+</script>

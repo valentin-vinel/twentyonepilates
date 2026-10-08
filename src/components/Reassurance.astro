@@ -1,0 +1,14 @@
+---
+import { studio } from '../config/studio';
+
+// Sur mobile, seuls les éléments marqués `mobile` restent affichés.
+const items = studio.reassurance;
+---
+
+{items.length > 0 && (
+  <section class="band" aria-label="En bref">
+    <ul class="wrap band__list">
+      {items.map((item) => <li class={item.mobile ? undefined : 'only-desktop'}>{item.text}</li>)}
+    </ul>
+  </section>
+)}

@@ -1,0 +1,16 @@
+---
+import { studio } from '../config/studio';
+import Logo from './Logo.astro';
+---
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <Logo />
+    <p class="footer__links">
+      {studio.address} ·{' '}
+      <a href="/mentions-legales/">Mentions légales</a> ·{' '}
+      <a href="/politique-de-confidentialite/">Confidentialité</a> ·{' '}
+      <button type="button" class="footer__cookies" data-consent-open>Gérer les cookies</button>
+    </p>
+  </div>
+</footer>

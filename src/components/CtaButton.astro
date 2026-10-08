@@ -1,0 +1,17 @@
+---
+import { studio } from '../config/studio';
+import { fill } from '../lib/text';
+
+/**
+ * Le seul appel à l'action de la page : même libellé partout, même cible,
+ * le formulaire de demande de rappel (LeadForm.astro).
+ */
+interface Props {
+  variant?: 'accent' | 'dark' | 'light';
+  class?: string;
+}
+
+const { variant = 'accent', class: className } = Astro.props;
+---
+
+<a class:list={['btn', `btn--${variant}`, className]} href="#rappel">{fill(studio.cta.label)}</a>

@@ -1,0 +1,73 @@
+---
+// Le pixel n'est chargé qu'après consentement explicite.
+// Voir ConsentBanner.astro, qui appelle window.__loadPixel().
+const pixelId = import.meta.env.PUBLIC_PIXEL_ID;
+
+if (!pixelId) {
+  console.warn(
+    '\n⚠  PUBLIC_PIXEL_ID absent : la page est construite SANS pixel Meta.' +
+      '\n   Copier .env.example en .env et renseigner l’identifiant du pixel du studio.\n',
+  );
+}
+---
+
+{pixelId && (
+  <script is:inline define:vars={{ pixelId }}>
+    window.__pixelLoaded = false;
+
+    window.__loadPixel = function () {
+      if (window.__pixelLoaded) return;
+      window.__pixelLoaded = true;
+
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+      window.fbq('init', pixelId);
+      window.fbq('track', 'PageView');
+    };
+
+    // Événements une seule fois par session, l'eventID conservé pour la
+    // déduplication avec la CAPI :
+    // - Contact : premier clic sur un lien tel:. Un clic n'est pas un appel décroché.
+    // - Lead : demande de rappel envoyée (LeadForm.astro), qui fournit son eventID,
+    //   aussi transmis avec la demande. Une demande n'est pas une séance réservée.
+    // Aucun des deux n'est une conversion.
+    // Sans consentement, le pixel n'est pas chargé : rien n'est marqué comme
+    // envoyé, pour qu'une action après acceptation déclenche bien l'événement.
+    window.__trackOnce = function (name, eventId) {
+      if (!window.fbq) return;
+      const key = name.toLowerCase();
+      try {
+        if (sessionStorage.getItem(key + 'Fired') === '1') return;
+        const id =
+          eventId ||
+          sessionStorage.getItem(key + 'EventId') ||
+          (crypto.randomUUID && crypto.randomUUID()) ||
+          String(Date.now()) + Math.random();
+        sessionStorage.setItem(key + 'Fired', '1');
+        sessionStorage.setItem(key + 'EventId', id);
+        window.fbq('track', name, {}, { eventID: id });
+      } catch {
+        // storage indisponible : on ne déclenche pas, plutôt que de compter en double.
+      }
+    };
+
+    document.addEventListener('click', function (event) {
+      if (event.target.closest('a[href^="tel:"]')) window.__trackOnce('Contact');
+    });
+  </script>
+)}

@@ -1,0 +1,108 @@
+---
+import Landing from '../layouts/Landing.astro';
+import Footer from '../components/Footer.astro';
+import { studio } from '../config/studio';
+
+const { legal, form } = studio;
+---
+
+<Landing
+  title={`Politique de confidentialité — ${studio.name}`}
+  description="Politique de confidentialité"
+  noindex
+>
+  <main class="section">
+    <div class="wrap prose">
+      <p><a class="btn btn--dark prose__back" href="/">← Retour à l'offre</a></p>
+    
+      <h1 class="title">Politique de confidentialité</h1>
+
+      <h2>Responsable du traitement</h2>
+      <p>
+        {studio.legalName}, {legal.headOffice || studio.address}. Courriel : {studio.email}.
+      </p>
+
+      <h2>Votre demande de rappel</h2>
+      <p>
+        Le formulaire «&nbsp;{form.title}&nbsp;» recueille votre prénom et votre numéro de
+        téléphone. Ils servent uniquement à vous rappeler pour organiser votre séance
+        découverte.
+      </p>
+      <ul class="prose__list">
+        <li>
+          Base légale : les mesures précontractuelles prises à votre demande (article 6.1.b
+          du RGPD).
+        </li>
+        <li>
+          Avec votre demande sont aussi enregistrés : sa date, votre adresse IP et votre
+          navigateur (protection contre les envois automatisés), ainsi que la campagne
+          publicitaire qui vous a amené ici (paramètres <code>utm_*</code> de l'adresse).
+          Si vous avez accepté la mesure d'audience, l'identifiant de clic Meta
+          (<code>fbclid</code>) et un identifiant technique de l'événement s'y ajoutent.
+        </li>
+        <li>Destinataire : l'équipe du studio {studio.name}, et elle seule.</li>
+        <li>
+          Prestataires techniques, qui traitent ces données pour le compte du studio et
+          sur ses instructions : {legal.host.name} (réception des demandes) et Google
+          (tableur de suivi des demandes). Des données peuvent être transférées aux
+          États-Unis, dans le cadre du Data Privacy Framework UE–États-Unis.
+        </li>
+        <li>Durée de conservation : {form.retention}.</li>
+      </ul>
+      <p>
+        Les appels passés au studio depuis le numéro affiché sur la page passent par votre
+        téléphone : la page n'enregistre ni votre numéro ni le contenu de l'appel.
+      </p>
+
+      <h2>Mesure d'audience publicitaire (Meta)</h2>
+      <p>
+        Uniquement si vous cliquez sur «&nbsp;Accepter&nbsp;», le pixel de Meta est chargé. Il permet de
+        savoir quelles publicités amènent des visites, des demandes de rappel et des clics
+        sur le numéro du studio, et dépose les cookies <code>_fbp</code> et <code>_fbc</code>, conservés 90 jours. Meta
+        reçoit alors votre adresse IP, des informations sur votre navigateur et les pages
+        consultées.
+      </p>
+      <ul class="prose__list">
+        <li>Base légale : votre consentement (article 6.1.a du RGPD).</li>
+        <li>
+          Destinataire : Meta Platforms Ireland Limited, responsable conjoint pour la collecte.
+          Des données peuvent être transférées aux États-Unis, dans le cadre du Data Privacy
+          Framework UE–États-Unis.
+        </li>
+        <li>Si vous refusez, rien n'est chargé depuis Meta et aucun de ces cookies n'est déposé.</li>
+      </ul>
+
+      <h2>Votre choix et comment le modifier</h2>
+      <p>
+        Votre choix est conservé 6 mois dans votre navigateur, puis la question vous est
+        reposée. Vous pouvez le modifier à tout moment avec «&nbsp;Gérer les cookies&nbsp;» en bas de
+        chaque page. Retirer votre consentement supprime les cookies de Meta de ce site.
+      </p>
+      <p>
+        <button type="button" class="btn btn--outline prose__back" data-consent-open>Gérer les cookies</button>
+      </p>
+
+      <h2>Données techniques de la visite</h2>
+      <p>
+        Les identifiants de la campagne publicitaire qui vous a amené ici (paramètres{' '}
+        <code>utm_*</code> et <code>fbclid</code> de l'adresse) sont gardés dans votre navigateur
+        le temps de la visite, puis effacés à la fermeture de l'onglet. Ils ne quittent votre
+        navigateur que si vous envoyez une demande de rappel, dans les conditions décrites
+        plus haut. L'hébergeur du site
+        ({legal.host.name}) enregistre, comme tout serveur web, des journaux techniques
+        (adresse IP, date, page demandée) pour la sécurité et le bon fonctionnement du site.
+      </p>
+
+      <h2>Vos droits</h2>
+      <p>
+        Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et
+        d'opposition, ainsi que du droit de retirer votre consentement à tout moment. Pour
+        les exercer, écrivez à {studio.email}. Vous pouvez aussi adresser une réclamation
+        à la CNIL (www.cnil.fr).
+      </p>
+
+      <p><a class="btn btn--dark prose__back" href="/">← Retour à l'offre</a></p>
+    </div>
+  </main>
+  <Footer />
+</Landing>
