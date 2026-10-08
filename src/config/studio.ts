@@ -210,9 +210,9 @@ export const studio: Studio = {
   email: '21pilatesdijon@gmail.com',
   legal: {
     form: 'SAS',
-    capital: '',
-    headOffice: '',
-    registration: '[ RCS Ville 123 456 789 (SIRET …) ]',
+    capital: '1 000 €',
+    headOffice: '5 A rue de Dijon, 21121 Fontaine-lès-Dijon',
+    registration: 'RCS Dijon 942 005 067 (SIRET du siège : 942 005 067 00015)',
     vat: 'FR44942005067',
     publicationDirector: 'Btissam Bataoui, co-fondatrice',
     host: {
