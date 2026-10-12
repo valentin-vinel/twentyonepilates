@@ -94,6 +94,18 @@ de contradiction, celui-ci fait foi.
 - Au clic de réservation, les UTM sont ajoutés au lien Momence ; fbclid
   seulement après consentement.
 - Aucune donnée personnelle collectée ni transmise par la page.
+- Meta peut restreindre des événements par domaine (catégorie sensible, ex.
+  santé) : le 2026-10-12, InitiateCheckout et Schedule ont été bloqués sur
+  decouverte.twentyonepilates.fr (« restricted event… suppressed » dans la
+  console), puis débloqués le jour même. Ne jamais contourner (renommer
+  l'événement, l'envoyer depuis un autre domaine). Un événement absent de
+  Meta se diagnostique là, pas dans le délai de redirection.
+- Réglage du pixel « Inclure automatiquement des informations plus détaillées
+  sur les pages et les produits » : désactivé, à laisser désactivé. Actif, il
+  envoie son propre InitiateCheckout sans eventID (cs_est=true), en doublon.
+- Avant chaque lancement de campagne, une fois la page en ligne :
+  `npm run check:meta -- decouverte.twentyonepilates.fr www.twentyonepilates.fr`
+  (scripts/check-meta.mjs) : événements restreints et détection automatique.
 
 ## Honnêteté
 - Aucun avis inventé, aucun faux compte à rebours.
