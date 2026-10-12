@@ -78,7 +78,18 @@ de contradiction, celui-ci fait foi.
   eventID unique conservé en sessionStorage.
 - Un clic n'est pas un appel décroché, un clic vers Momence n'est pas une séance
   réservée. Ne jamais les appeler conversion. Les réservations se comptent dans
-  Momence, et ne remontent dans Meta que par le pixel configuré côté Momence.
+  Momence, qui n'a pas de pixel.
+- Après chaque réservation de créneau (pas après un achat), Momence renvoie
+  vers la page de confirmation du site du studio (twentyonepilates.fr/thank-you,
+  hébergée chez Hostinger, hors de ce projet ; snippet et sauvegarde dans
+  site-studio/). Au clic de réservation, après consentement, la page pose le
+  cookie t21_lp_booking (eventID, 15 jours : la séance se paie, puis le créneau
+  se réserve dans les 15 jours) sur le domaine racine ; la page de confirmation
+  envoie alors Schedule une fois avec cet eventID, puis l'efface. Sans ce
+  cookie, rien. Schedule est un créneau réservé, pas une séance payée ni
+  honorée : ne jamais l'appeler conversion ni paiement. Le paiement lui-même ne
+  remonte pas dans Meta.
+- La page doit donc être servie sur un sous-domaine de twentyonepilates.fr.
 - fbclid et UTM capturés à l'arrivée en sessionStorage.
 - Au clic de réservation, les UTM sont ajoutés au lien Momence ; fbclid
   seulement après consentement.

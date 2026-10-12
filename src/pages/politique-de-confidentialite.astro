@@ -2,6 +2,7 @@
 import Landing from '../layouts/Landing.astro';
 import Footer from '../components/Footer.astro';
 import { studio } from '../config/studio';
+import { BOOKING_COOKIE } from '../lib/booking-cookie';
 
 const { legal } = studio;
 ---
@@ -59,12 +60,21 @@ const { legal } = studio;
         </li>
         <li>Si tu refuses, rien n'est chargé depuis Meta et aucun de ces cookies n'est déposé.</li>
       </ul>
+      <p>
+        Si tu as accepté, cliquer sur le bouton de réservation dépose aussi le cookie{' '}
+        <code>{BOOKING_COOKIE}</code>, conservé 15 jours, sur le domaine du site du studio,
+        sous-domaines compris. Il contient un identifiant aléatoire et rien d'autre. Après
+        ta réservation, Momence te renvoie vers la page de confirmation du site du studio : ce cookie lui indique que
+        tu viens de cette offre, pour qu'elle signale une seule fois à Meta que tu as vu la
+        confirmation. La page l'efface aussitôt.
+      </p>
 
       <h2>Ton choix et comment le modifier</h2>
       <p>
         Ton choix est conservé 6 mois dans ton navigateur, puis la question t'est
         reposée. Tu peux le modifier à tout moment avec «&nbsp;Gérer les cookies&nbsp;» en bas de
-        chaque page. Retirer ton consentement supprime les cookies de Meta de ce site.
+        chaque page. Retirer ton consentement supprime les cookies de Meta de ce site, ainsi
+        que le cookie <code>{BOOKING_COOKIE}</code>.
       </p>
       <p>
         <button type="button" class="btn btn--outline prose__back" data-consent-open>Gérer les cookies</button>

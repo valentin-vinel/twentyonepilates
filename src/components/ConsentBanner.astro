@@ -9,7 +9,7 @@
 <div class="consent" id="consent" hidden role="dialog" aria-live="polite" aria-label="Gestion des cookies">
   <p>
     Nous utilisons un cookie de mesure d'audience publicitaire pour savoir quelles
-    campagnes amènent des clics vers la réservation et des appels. Tu peux refuser sans conséquence sur ta
+    campagnes amènent des clics vers la réservation, des réservations et des appels. Tu peux refuser sans conséquence sur ta
     navigation, et changer d'avis à tout moment via «&nbsp;Gérer les cookies&nbsp;» en bas de page.
     <a href="/politique-de-confidentialite/">En savoir plus</a>
   </p>
@@ -20,6 +20,8 @@
 </div>
 
 <script>
+  import { BOOKING_COOKIE } from '../lib/booking-cookie';
+
   const KEY = 'consent-ads';
   // Durée de validité du choix recommandée par la CNIL : 6 mois.
   const MAX_AGE_MS = 182 * 24 * 60 * 60 * 1000;
@@ -43,11 +45,12 @@
     }
   }
 
-  // Cookies _fbp et _fbc posés par le pixel sur le domaine du site.
+  // Cookies _fbp et _fbc posés par le pixel sur le domaine du site, et cookie
+  // de retour de réservation (src/lib/booking-cookie.ts).
   function clearMetaCookies() {
     const host = location.hostname;
     const domains = ['', host, '.' + host.split('.').slice(-2).join('.')];
-    for (const name of ['_fbp', '_fbc']) {
+    for (const name of ['_fbp', '_fbc', BOOKING_COOKIE]) {
       for (const domain of domains) {
         document.cookie = `${name}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ''}`;
       }

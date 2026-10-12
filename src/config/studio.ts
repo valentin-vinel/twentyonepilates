@@ -198,8 +198,7 @@ export interface Studio {
 }
 
 export const studio: Studio = {
-  // Vide tant que l'URL n'est pas connue : pas de balise canonique ni d'og:image.
-  siteUrl: '',
+  siteUrl: 'https://decouverte.twentyonepilates.fr',
   name: 'TWENTY ONE',
   tagline: 'Pilates Reformer • Dijon',
   // Affiché à gauche du nom. Fond transparent : la forme est peinte dans la couleur du texte.
@@ -286,8 +285,8 @@ export const studio: Studio = {
         { label: 'Tarif', value: '{price}.' },
       ],
       steps: [
-        'Tu règles {price} en ligne pour confirmer ta place.',
-        'Tu choisis ton créneau sur Momence.',
+        'Tu règles {price} en ligne sur Momence.',
+        'Tu choisis ton créneau dans les 15 jours.',
         'Tu viens au studio pour ta première séance.',
       ],
     },
@@ -358,7 +357,7 @@ export const studio: Studio = {
     },
     final: {
       title: 'Six places par cours,\n *réserve la tienne*',
-      text: 'Choisis ton créneau sur Momence et règle {price} en ligne. Ta séance reste valable 15 jours après le paiement.',
+      text: 'Règle {price} en ligne sur Momence, puis choisis ton créneau dans les 15 jours.',
       // null : aucune. `focus` règle le cadrage, ex. 'center 35%'.
       storefront: {
         file: 'salle-reformers.JPG',

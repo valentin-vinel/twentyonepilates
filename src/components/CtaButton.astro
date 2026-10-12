@@ -9,8 +9,9 @@ import { fill } from '../lib/text';
  * Au clic : les UTM de l'arrivée sont ajoutés au lien, pour que la
  * réservation garde la trace de l'annonce ; fbclid seulement si le pixel est
  * chargé, donc après consentement. L'événement InitiateCheckout part une fois
- * par session. Un clic n'est pas une séance réservée : la réservation se fait
- * sur Momence, hors de cette page.
+ * par session, et le cookie de retour de réservation est posé
+ * (src/lib/booking-cookie.ts). Un clic n'est pas une séance réservée : la
+ * réservation se fait sur Momence, hors de cette page.
  */
 interface Props {
   variant?: 'dark' | 'light';
@@ -25,6 +26,8 @@ const { variant, class: className } = Astro.props;
 </a>
 
 <script>
+  import { BOOKING_COOKIE, BOOKING_COOKIE_MAX_AGE, rootDomain } from '../lib/booking-cookie';
+
   const w = window as any;
 
   function session(key: string): string {
@@ -43,6 +46,23 @@ const { variant, class: className } = Astro.props;
     return url.href;
   }
 
+  // Voir src/lib/booking-cookie.ts. Même eventID pour toute la session, comme
+  // les autres événements.
+  function markBooking() {
+    try {
+      let id = sessionStorage.getItem('scheduleEventId');
+      if (!id) {
+        id = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random();
+        sessionStorage.setItem('scheduleEventId', id);
+      }
+      document.cookie =
+        `${BOOKING_COOKIE}=${id}; Max-Age=${BOOKING_COOKIE_MAX_AGE}; Path=/; ` +
+        `Domain=${rootDomain()}; SameSite=Lax; Secure`;
+    } catch {
+      // storage indisponible : pas de cookie, la confirmation ne comptera rien.
+    }
+  }
+
   document.addEventListener('click', (event) => {
     const link = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[data-booking]');
     if (!link) return;
@@ -50,6 +70,7 @@ const { variant, class: className } = Astro.props;
     if (!w.__pixelLoaded) return;
 
     w.__trackOnce?.('InitiateCheckout');
+    markBooking();
     // Clic simple dans le même onglet : on laisse 150 ms au pixel pour partir
     // avant de quitter la page. Ctrl/Cmd-clic ou clic milieu : rien à attendre.
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

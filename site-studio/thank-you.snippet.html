@@ -1,0 +1,41 @@
+<!--
+  À coller dans thank-you.html du site du studio (Hostinger), juste avant </body>.
+  Pendant de src/lib/booking-cookie.ts : même nom de cookie, même domaine.
+
+  Ne fait rien, sauf si la personne vient de la page de la séance découverte
+  (cookie t21_lp_booking, posé seulement si elle y a accepté les cookies) :
+  envoie alors Schedule une seule fois au pixel Meta, puis efface le cookie.
+  Schedule = un créneau réservé, pas une séance payée : ce n'est pas une conversion.
+-->
+<script>
+(function () {
+  var match = document.cookie.match(/(?:^|;\s*)t21_lp_booking=([\w.-]+)/);
+  if (!match) return;
+  var eventId = match[1];
+
+  // Effacé avant tout : un rechargement de la page ne compte plus rien.
+  document.cookie = 't21_lp_booking=; Max-Age=0; Path=/; Domain=.twentyonepilates.fr; SameSite=Lax; Secure';
+
+  // Refus des cookies publicitaires enregistré sur ce site : on le respecte.
+  try {
+    var consent = JSON.parse(localStorage.getItem('t21_cookie_consent'));
+    if (consent && consent.decided && !consent.marketing) return;
+  } catch (e) {}
+
+  if (window.TWO1 && TWO1.loadMeta) {
+    TWO1.loadMeta();
+  } else if (!window.fbq) {
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1518305853020844');
+    fbq('track', 'PageView');
+  }
+  fbq('track', 'Schedule', {}, { eventID: eventId });
+})();
+</script>
